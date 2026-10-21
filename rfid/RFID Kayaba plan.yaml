@@ -1,0 +1,115 @@
+# RFID marking plan - made with the AGV Simulator (page 'RFID marks'). Marking only.
+name: Kayaba RFID plan
+routes: [AGV_Kayaba (ITG _ T6)_Improved.yaml, AGV_Kayaba (Piston) 2_auto.yaml, AGV_Kayaba (UBC) 2_auto.yaml]
+commands:
+- {name: ENABLE MARKER, color: '#0b7285'}
+- {name: B. PISTON, color: '#5c940d'}
+- {name: REV PISTON, color: '#d6336c'}
+- {name: STOP PISTON, color: '#e67700'}
+- {name: DIS AE, color: '#364fc7'}
+- {name: APPR REV, color: '#862e9c'}
+- {name: ENABLE REV, color: '#2b8a3e'}
+- {name: B. UBC, color: '#a61e4d'}
+- {name: BR. ITG, color: '#0b7285'}
+- {name: B. ITG, color: '#5c940d'}
+tags:
+- {id: '0000', command: HOME}
+- {id: '0014', command: SLOW}
+- {id: 0018, command: MAX}
+- {id: 000C, command: STOP}
+- {id: '0016', command: HIGH}
+- {id: '0015', command: MED}
+- {id: '0003', command: REVERSE}
+- {id: 00BA, command: ENABLE MARKER}
+- {id: 00AE, command: LEFT}
+- {id: 00BB, command: RIGHT}
+- {id: 00AB, command: B. PISTON}
+- {id: '0002', command: REV PISTON}
+- {id: 001C, command: STOP PISTON}
+- {id: 0008, command: MAX}
+- {id: 00B2, command: DIS AE}
+- {id: 00CA, command: APPR REV}
+- {id: 00CE, command: ENABLE REV}
+- {id: 00AA, command: B. UBC}
+- {id: 00A3, command: BR. ITG}
+- {id: '0012', command: APPROACH}
+- {id: '0001', command: REVERSE}
+- {id: 00AC, command: B. ITG}
+marks:
+- {id: '0000', x: 179.869, y: 41.622}
+- {id: '0014', x: 179.88, y: 40.132}
+- {id: 0018, x: 179.933, y: 33.254}
+- {id: '0014', x: 182.282, y: 34.679}
+- {id: 000C, x: 182.3, y: 33.196}
+- {id: '0016', x: 182.196, y: 43.32}
+- {id: '0015', x: 182.135, y: 49.301}
+- {id: '0003', x: 181.177, y: 44.19}
+- {id: 00BA, x: 180.191, y: 43.282}
+- {id: '0014', x: 181.708, y: 45.0}
+- {id: '0016', x: 182.03, y: 59.002}
+- {id: '0014', x: 182.008, y: 59.707}
+- {id: 00BB, x: 182.151, y: 47.731}
+- {id: 00BB, x: 182.046, y: 58.054}
+- {id: '0014', x: 177.005, y: 61.948}
+- {id: 00AE, x: 176.152, y: 61.947}
+- {id: 00AB, x: 177.687, y: 61.948}
+- {id: '0002', x: 178.348, y: 61.963}
+- {id: '0015', x: 179.934, y: 67.752}
+- {id: '0014', x: 179.936, y: 71.29}
+- {id: 001C, x: 179.933, y: 71.907}
+- {id: 0018, x: 181.065, y: 71.742}
+- {id: 00B2, x: 181.069, y: 71.185}
+- {id: '0014', x: 181.076, y: 65.128}
+- {id: 00AB, x: 181.092, y: 64.067}
+- {id: 00AE, x: 181.092, y: 63.756}
+- {id: 00AE, x: 170.364, y: 61.942}
+- {id: 00BB, x: 172.526, y: 61.944}
+- {id: '0015', x: 174.277, y: 61.946}
+- {id: '0016', x: 167.826, y: 61.951}
+- {id: 00AB, x: 93.756, y: 61.691}
+- {id: '0016', x: 96.246, y: 61.687}
+- {id: 00AE, x: 89.488, y: 61.11}
+- {id: '0015', x: 86.899, y: 60.603}
+- {id: '0014', x: 81.617, y: 60.606}
+- {id: 001C, x: 79.656, y: 60.607}
+- {id: '0016', x: 80.381, y: 58.287}
+- {id: '0014', x: 85.147, y: 58.321}
+- {id: '0002', x: 88.325, y: 60.278}
+- {id: 00BA, x: 87.834, y: 59.805}
+- {id: 00CA, x: 86.87, y: 59.6}
+- {id: 00CE, x: 82.408, y: 58.302}
+- {id: 00AE, x: 98.912, y: 61.698}
+- {id: 00AA, x: 87.937, y: 61.877}
+- {id: 00A3, x: 86.366, y: 61.876}
+- {id: '0016', x: 83.58, y: 65.97}
+- {id: '0014', x: 83.585, y: 64.873}
+- {id: 00AE, x: 83.572, y: 73.362}
+- {id: '0015', x: 85.035, y: 83.612}
+- {id: '0014', x: 84.958, y: 90.683}
+- {id: '0012', x: 84.651, y: 92.282}
+- {id: 000C, x: 83.392, y: 92.155}
+- {id: '0016', x: 83.466, y: 89.74}
+- {id: 00AA, x: 83.534, y: 78.732}
+- {id: 00BB, x: 83.543, y: 78.296}
+- {id: '0014', x: 83.535, y: 78.529}
+- {id: '0001', x: 83.567, y: 77.477}
+- {id: 00BA, x: 82.984, y: 78.728}
+- {id: 00CA, x: 82.649, y: 79.292}
+- {id: '0016', x: 83.567, y: 77.151}
+- {id: '0014', x: 44.174, y: 61.812}
+- {id: '0016', x: 45.338, y: 61.814}
+- {id: '0014', x: 41.161, y: 64.421}
+- {id: '0015', x: 41.159, y: 65.251}
+- {id: '0016', x: 41.135, y: 77.837}
+- {id: 00AC, x: 41.115, y: 87.846}
+- {id: '0015', x: 41.117, y: 87.035}
+- {id: '0015', x: 43.841, y: 89.856}
+- {id: '0014', x: 52.814, y: 89.915}
+- {id: 000C, x: 53.852, y: 89.904}
+- {id: '0012', x: 54.818, y: 90.279}
+- {id: '0014', x: 53.105, y: 92.228}
+- {id: '0015', x: 49.672, y: 90.971}
+- {id: '0014', x: 47.232, y: 90.947}
+- {id: '0001', x: 41.986, y: 92.001}
+- {id: 00BA, x: 43.935, y: 92.073}
+- {id: 00CA, x: 44.559, y: 92.064}

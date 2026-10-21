@@ -1,0 +1,27 @@
+AGV SIMULATOR - HOW TO START
+============================
+
+1. Unzip this folder somewhere normal (Documents or Desktop - not inside the zip preview).
+
+2. Python 3 must be installed once (free): https://www.python.org/downloads/
+   Windows: in the installer tick "Add python.exe to PATH".
+   Mac: install it from the same page.
+
+3. Start:
+   Windows:  double-click  "Start Simulator (Windows).bat"
+   Mac:      double-click  "Start Simulator.command"
+             (the first time macOS may block it: right-click it -> Open -> Open)
+   Linux:    ./start_simulator.sh
+
+   The first start needs internet for about a minute (it installs numpy, matplotlib,
+   pillow, pyyaml and flask into a local .venv folder). After that it works offline.
+
+4. Your browser opens the simulator. Keep the black window open while you use it;
+   close it to stop the simulator.
+
+In the app: Route tab (floor plan, route points, ruler, auto route), Vehicle tab (AGV,
+trolleys, PID / speeds), Run simulation, Results and Turning tabs. Click "? Help" for more.
+
+Included: AGV2 (Kayaba) vehicle settings in configs/, the Kayaba floor plan in maps/ and
+the AGV_Kayaba routes in routes/, plus example vehicles and a demo floor plan.
+Results are written to the results/ folder. Full manual: README.md.

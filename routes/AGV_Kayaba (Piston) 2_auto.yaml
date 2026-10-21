@@ -1,0 +1,66 @@
+name: AGV Kayaba (auto)
+map: {image: ../maps/kayaba.png, meters_per_pixel: 0.12458, obstacle_threshold: 100}
+loop: true
+default_radius: 2.0
+default_mode: SLOW
+waypoints:
+- {x: 180.771, y: 43.809, action: stop, dwell: 2.0, radius: 0.0, mode: SLOW}
+- {x: 181.33, y: 44.333, radius: 1.25}
+- {x: 181.816, y: 45.191, radius: 1.25}
+- {x: 182.065, y: 45.854, radius: 1.0}
+- {x: 182.061, y: 46.34, mode: MED}
+- {x: 181.998, y: 58.947, mode: SLOW}
+- {x: 181.942, y: 61.951, radius: 2.5}
+- {x: 178.281, y: 61.961, name: REVERSE, action: stop, dwell: 1.0, radius: 0.0, direction: reverse, mode: SLOW}
+- {x: 179.067, y: 61.959, radius: 1.0, direction: reverse, mode: SLOW}
+- {x: 181.036, y: 62.46, radius: 1.0, direction: reverse}
+- {x: 181.094, y: 63.693, action: stop, dwell: 5.0, radius: 0.0, mode: SLOW, cart: attach}
+- {x: 181.037, y: 62.453, radius: 1.0}
+- {x: 179.067, y: 61.959, radius: 1.0, mode: SLOW}
+- {x: 174.209, y: 61.973, mode: HIGH}
+- {x: 93.774, y: 61.691, mode: SLOW}
+- {x: 90.242, y: 61.679, radius: 2.5}
+- {x: 88.813, y: 60.602, radius: 2.5}
+- {x: 87.676, y: 60.603, mode: MAX}
+- {x: 82.678, y: 60.605, mode: APPROACH}
+- {x: 79.6, y: 60.607, action: stop, dwell: 2.0, radius: 0.0, mode: SLOW, cart: detach}
+- {x: 78.365, y: 60.591, radius: 1.179}
+- {x: 78.356, y: 58.272, radius: 1.147}
+- {x: 79.815, y: 58.283, mode: MAX}
+- {x: 82.726, y: 58.304, mode: SLOW}
+- {x: 86.572, y: 58.332, radius: 2.5}
+- {x: 87.624, y: 59.594, radius: 1.018}
+- {x: 88.216, y: 60.208, radius: 2.5}
+- {x: 88.988, y: 60.76, name: REVERSE, action: stop, dwell: 1.0, radius: 0.0, direction: reverse, mode: SLOW}
+- {x: 88.348, y: 60.303, radius: 1.0, direction: reverse, mode: SLOW}
+- {x: 87.655, y: 59.612, radius: 1.0, direction: reverse}
+- {x: 86.045, y: 59.588, action: stop, dwell: 5.0, radius: 0.0, mode: SLOW, cart: attach}
+- {x: 87.655, y: 59.612, radius: 1.0}
+- {x: 88.348, y: 60.303, radius: 1.0, mode: SLOW}
+- {x: 90.251, y: 61.663, radius: 2.5}
+- {x: 94.347, y: 61.679, mode: MAX}
+- {x: 174.721, y: 62.01, mode: SLOW}
+- {x: 178.293, y: 61.964, radius: 2.5}
+- {x: 179.051, y: 61.955}
+- {x: 181.077, y: 62.43}
+- {x: 181.1, y: 64.482}
+- {x: 179.942, y: 66.611}
+- {x: 179.933, y: 67.529, mode: HIGH}
+- {x: 179.939, y: 70.426, mode: SLOW}
+- {x: 179.936, y: 71.424, action: stop, dwell: 3.0, radius: 0.0, mode: SLOW, cart: detach}
+- {x: 179.928, y: 72.646, radius: 0.908}
+- {x: 181.053, y: 72.653, radius: 0.963}
+- {x: 181.069, y: 71.421, mode: MAX}
+- {x: 181.076, y: 64.989, mode: SLOW}
+- {x: 181.085, y: 63.544}
+- {x: 181.302, y: 62.836}
+- {x: 181.937, y: 61.943}
+- {x: 182.038, y: 58.76, mode: HIGH}
+- {x: 182.297, y: 33.436, mode: SLOW}
+- {x: 182.319, y: 31.588, radius: 0.75}
+- {x: 179.946, y: 31.553, radius: 0.75}
+- {x: 179.938, y: 32.608, mode: HIGH}
+- {x: 179.871, y: 41.329, mode: SLOW}
+- {x: 179.858, y: 42.995, radius: 1.25}
+- {x: 180.542, y: 43.605, mode: APPROACH}
+target_cycle_s: 453.0

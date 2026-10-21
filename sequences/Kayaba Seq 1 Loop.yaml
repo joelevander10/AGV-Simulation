@@ -1,0 +1,7 @@
+name: sequence
+steps:
+- {route: AGV_Kayaba (ITG _ T6)_auto.yaml, agv: AGV_Kayaba (T6).yaml}
+- {route: AGV_Kayaba (ITG _ T6)_auto.yaml, agv: AGV_Kayaba (ITG).yaml}
+- {route: AGV_Kayaba (UBC)_auto.yaml, agv: AGV_Kayaba (UBC).yaml}
+- {route: AGV_Kayaba (Piston)_auto.yaml, agv: AGV_Kayaba (Piston).yaml}
+- {route: AGV_Kayaba (OCC)_auto.yaml, agv: AGV_Kayaba (OCC).yaml}

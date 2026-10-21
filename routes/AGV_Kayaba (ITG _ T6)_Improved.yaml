@@ -1,0 +1,52 @@
+name: AGV Kayaba (auto)
+map: {image: ../maps/kayaba.png, meters_per_pixel: 0.12458, obstacle_threshold: 100}
+loop: true
+default_radius: 2.5
+default_mode: SLOW
+waypoints:
+- {x: 180.771, y: 43.809, action: stop, dwell: 2.0, radius: 0.0, mode: SLOW}
+- {x: 181.33, y: 44.333, radius: 1.25}
+- {x: 181.816, y: 45.191, radius: 1.25}
+- {x: 182.065, y: 45.854, radius: 1.0}
+- {x: 182.061, y: 46.34, mode: MED}
+- {x: 181.95, y: 59.611, mode: SLOW}
+- {x: 181.93, y: 61.951, radius: 1.25}
+- {x: 177.389, y: 61.948, mode: HIGH}
+- {x: 45.115, y: 61.843, mode: SLOW}
+- {x: 41.166, y: 61.84, radius: 1.25}
+- {x: 41.161, y: 64.389, mode: HIGH}
+- {x: 41.116, y: 87.495, mode: SLOW}
+- {x: 41.111, y: 89.839, radius: 1.25}
+- {x: 42.655, y: 89.849, mode: HIGH}
+- {x: 51.832, y: 89.908, mode: APPROACH}
+- {x: 53.31, y: 89.918, action: stop, dwell: 3.0, radius: 0.0, mode: SLOW, cart: detach}
+- {x: 54.674, y: 89.882, radius: 0.75}
+- {x: 55.191, y: 91.214, radius: 0.75}
+- {x: 54.418, y: 92.222, radius: 0.75}
+- {x: 52.396, y: 92.231, radius: 1.25}
+- {x: 50.598, y: 90.98, radius: 1.25}
+- {x: 49.913, y: 90.973}
+- {x: 47.839, y: 90.953, mode: SLOW}
+- {x: 46.313, y: 90.938, radius: 1.25}
+- {x: 44.802, y: 92.079, radius: 1.25}
+- {x: 43.847, y: 92.072, name: REVERSE, action: stop, dwell: 1.0, radius: 0.0, direction: reverse, mode: SLOW}
+- {x: 44.033, y: 92.068, radius: 1.0, direction: reverse, mode: SLOW}
+- {x: 45.25, y: 92.058, action: stop, dwell: 5.0, radius: 0.0, mode: SLOW, cart: attach}
+- {x: 43.425, y: 92.053, mode: SLOW}
+- {x: 41.075, y: 92.046, radius: 1.25}
+- {x: 41.08, y: 90.496}
+- {x: 41.09, y: 86.986, mode: HIGH}
+- {x: 41.158, y: 64.157, mode: SLOW}
+- {x: 41.165, y: 61.809, radius: 1.25}
+- {x: 45.713, y: 61.814, mode: HIGH}
+- {x: 178.023, y: 61.957, mode: SLOW}
+- {x: 181.96, y: 61.961, radius: 1.25}
+- {x: 181.99, y: 59.424, mode: HIGH}
+- {x: 182.297, y: 33.436, mode: SLOW}
+- {x: 182.319, y: 31.588, radius: 0.75}
+- {x: 179.946, y: 31.553, radius: 0.75}
+- {x: 179.938, y: 32.608, mode: HIGH}
+- {x: 179.871, y: 41.329, mode: SLOW}
+- {x: 179.858, y: 42.995, radius: 1.25}
+- {x: 180.542, y: 43.605, mode: APPROACH}
+target_cycle_s: 830.4

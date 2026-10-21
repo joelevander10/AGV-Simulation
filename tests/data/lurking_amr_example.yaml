@@ -1,0 +1,23 @@
+# Example of a lurking (under-cart) AMR with axle tracking (QR / SLAM navigation).
+name: Lurking AMR example
+chassis: {length: 1.18, width: 0.675, height: 0.30, axle_from_rear: 0.59, mass_kg: 180, cg_height: 0.15, drive_load_fraction: 0.5}
+wheels:
+  diameter: 0.18
+  width: 0.06
+  track: 0.377
+  castors:
+    - {x:  0.45, y:  0.25}
+    - {x:  0.45, y: -0.25}
+    - {x: -0.45, y:  0.25}
+    - {x: -0.45, y: -0.25}
+drivetrain: {motor_rated_power_w: 400, motor_rated_rpm: 3000, motor_max_rpm: 3000, gear_ratio: 30, layout: right_angle}
+performance: {v_straight: 1.0, v_curve: 0.5, v_reverse: 0.3, accel: 0.4, decel: 0.4, jerk: 1.0,
+              pivot_speed_dps: 30, pivot_accel_dps2: 30, pivot_jerk_dps3: 60}
+speed_modes:
+  - {name: DOCKING, v_straight: 0.2, v_curve: 0.2, v_reverse: 0.1, accel: 0.2, decel: 0.2}
+sensors:
+  - {name: lidar, type: safety_lidar, x: 0.55, y: 0.0, z: 0.20}
+  - {name: qr_camera, type: GLS621, x: 0.0, y: 0.0, z: 0.05}
+tracking: {forward: axle, reverse: axle}
+hook: {type: lurking, x: 0.0, y: 0.0, z: 0.30, lift_stroke: 0.05, attach_time: 4, detach_time: 4}
+cart: {length: 1.4, width: 0.9, height: 1.2, mass_kg: 300, underside_clearance: 0.35, cg_height: 0.8, wheel_track: 0.8}

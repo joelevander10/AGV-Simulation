@@ -1,0 +1,105 @@
+# =============================================================================
+# Example: magnetic-tape tow tractor (the earlier AGV2 layout: 157 cm, sensor 1.15 m ahead) (differential drive, front castors)
+#   [spec]  = taken from the AGV2 spec sheet
+#   TODO    = placeholder: measure it / take it from the datasheet
+# Body frame: origin = drive-axle centre, +x forward, +y left, +z up (metres)
+# =============================================================================
+name: Tow tractor example (old AGV2 layout)
+
+chassis:
+  length: 1.575            # [spec] 157.467 cm
+  width: 0.53              # [spec]
+  height: 0.368            # [spec]
+  ground_clearance: 0.03   # TODO
+  axle_from_rear: 0.322    # [spec] drive wheels 32.211 cm from rear
+  mass_kg: 150             # TODO weigh the AGV incl. battery
+  drive_load_fraction: 0.6 # TODO share of AGV weight on the drive wheels
+  cg_height: 0.20          # TODO centre of gravity height (tip-over check)
+
+wheels:
+  diameter: 0.18           # [spec]
+  width: 0.06              # [spec]
+  track: 0.391             # [spec] 39.105 cm centre-to-centre
+  friction_coeff: 0.5      # TODO PU tyre on your floor
+  scrub_factor: 1.0        # tyre twist torque (castor swivel, pivots); 0 = ignore
+  castors:                 # [spec] D 10 cm, 13.007 cm from front, 27.76 cm apart
+    # trail = swivel offset (kingpin -> castor axle), TODO measure (typ. 30-40 mm for 100 mm castors)
+    - {x: 1.122, y:  0.139, diameter: 0.10, width: 0.05, trail: 0.035}
+    - {x: 1.122, y: -0.139, diameter: 0.10, width: 0.05, trail: 0.035}
+
+drivetrain:
+  motor_rated_power_w: 200      # [spec]
+  motor_rated_rpm: 3000         # TODO from motor nameplate
+  motor_max_rpm: 3000           # [spec] driver 10 V -> 3000 rpm
+  motor_peak_torque_factor: 3.0 # TODO driver current limit / motor datasheet
+  motor_efficiency: 0.85        # TODO
+  gear_ratio: 30                # [spec] 1:30
+  gear_efficiency: 0.90         # TODO (worm gear can be 0.6-0.8!)
+  layout: right_angle           # TODO coaxial | right_angle | parallel
+  motor_diameter: 0.08          # TODO
+  motor_length: 0.12            # TODO
+  gearbox_length: 0.08          # TODO
+  battery_voltage: 24           # [spec] 24 V system
+  battery_capacity_ah: 40       # TODO
+  battery_usable_fraction: 0.8
+  aux_power_w: 40               # TODO controller + sensors + HMI
+
+performance:
+  v_straight: 0.70         # TODO your NORMAL speed mode
+  v_curve: 0.35            # TODO speed used on tape curves
+  v_reverse: 0.20          # TODO reverse mode
+  accel: 0.25              # TODO
+  decel: 0.25              # TODO smooth ramps (towed trailer)
+  max_lateral_accel: 0.4
+  min_turn_radius: 1.0     # warn when a tape curve is tighter than this
+  pivot_speed_dps: 20
+  pivot_accel_dps2: 20
+  jerk: 0.0                # m/s3 S-curve ramps; 0 = linear ramps (trapezoid). Try 0.5 for smooth S-ramps
+  pivot_jerk_dps3: 0.0     # deg/s3 for spin-in-place; 0 = linear ramps
+  stop_settle_time: 1.0    # s per stop (RFID read, brake)
+
+# Named speed modes, used per route leg with `mode: SLOW` on a waypoint.
+# The performance section above is the default mode (your NORMAL mode).
+speed_modes:               # TODO put the real values of your controller's modes here
+  - {name: SLOW,       v_straight: 0.40, v_curve: 0.30, v_reverse: 0.20, accel: 0.25, decel: 0.25}
+  - {name: EXTRA_SLOW, v_straight: 0.15, v_curve: 0.15, v_reverse: 0.10, accel: 0.15, decel: 0.15}
+
+sensors:                   # TODO measure real positions
+  - {name: tape_front, type: magnetic_MGS1600, x: 1.15, y: 0.0, z: 0.03, note: front tape sensor}
+  - {name: tape_rear,  type: magnetic_MGS1600, x: -0.25, y: 0.0, z: 0.03, note: rear tape sensor (reverse)}
+  - {name: rfid,       type: rfid_reader,      x: 0.60, y: 0.0, z: 0.04}
+
+# Tape AGV: the SENSOR follows the tape, the axle cuts inside every curve.
+# Set both to "axle" if you draw the path of the drive-axle centre instead.
+tracking:
+  forward: tape_front
+  reverse: tape_rear
+
+hook:
+  type: tow                # none | tow | lurking
+  x: -0.45                 # [spec] hitch 40-50 cm behind the drive wheels
+  y: 0.0
+  z: 0.20                  # TODO hitch pin height
+  attach_time: 5.0         # TODO s to hitch a cart at a waypoint with `cart: attach`
+  detach_time: 5.0         # TODO s to unhitch at a waypoint with `cart: detach`
+
+cart:
+  length: 1.20             # TODO trailer body
+  width: 0.80              # TODO
+  height: 0.90             # TODO
+  mass_kg: 170             # [spec] trailer load (add the trailer's own mass!)
+  rolling_resistance: 0.02
+  tongue_length: 1.30      # TODO hitch eye -> trailer FIXED-wheel axle
+  axle_from_rear: 0.20     # TODO fixed axle from trailer rear edge
+  hitch_height: 0.20       # TODO drawbar eye height
+  max_articulation_deg: 75
+  cg_height: 0.60          # TODO loaded cart centre of gravity height
+  wheel_track: 0.70        # TODO cart wheel spacing (across) - tip-over check
+
+simulation:
+  dt: 0.02
+  ds: 0.01
+  safety_margin: 0.10
+  rolling_resistance: 0.015
+  collision_spacing: 0.05
+  yaw_response_time: 0.3

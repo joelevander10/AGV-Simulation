@@ -1,0 +1,27 @@
+# --- AGV Simulator: what stays out of git ---
+# zips made from this folder (make them again any time) and the 40 MB portable Windows Python
+AGV_Simulator.zip
+AGV_Simulator_Windows.zip
+*.part
+tools/windows_portable/
+
+# simulation results (made again by Run simulation) and demo output
+results/
+results_demo/
+
+# backups the app writes before changing a file (routes/.backup, rfid/.backup ...)
+.backup/
+_upd/
+
+# Python, tests, virtual environments
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# macOS / Windows / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
