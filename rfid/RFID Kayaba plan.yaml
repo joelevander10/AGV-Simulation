@@ -12,6 +12,7 @@ commands:
 - {name: B. UBC, color: '#a61e4d'}
 - {name: BR. ITG, color: '#0b7285'}
 - {name: B. ITG, color: '#5c940d'}
+- {name: IGNORE REV, color: '#d6336c'}
 tags:
 - {id: '0000', command: HOME}
 - {id: '0014', command: SLOW}
@@ -35,6 +36,7 @@ tags:
 - {id: '0012', command: APPROACH}
 - {id: '0001', command: REVERSE}
 - {id: 00AC, command: B. ITG}
+- {id: 00CB, command: IGNORE REV}
 marks:
 - {id: '0000', x: 179.869, y: 41.622}
 - {id: '0014', x: 179.88, y: 40.132}
@@ -113,3 +115,4 @@ marks:
 - {id: '0001', x: 41.986, y: 92.001}
 - {id: 00BA, x: 43.935, y: 92.073}
 - {id: 00CA, x: 44.559, y: 92.064}
+- {id: 00CB, x: 83.575, y: 71.554}
