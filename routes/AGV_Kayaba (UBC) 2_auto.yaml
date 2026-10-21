@@ -7,11 +7,12 @@ waypoints:
 - {x: 180.771, y: 43.809, action: stop, dwell: 2.0, radius: 0.0, mode: SLOW, cart: attach}
 - {x: 181.33, y: 44.333, radius: 1.25}
 - {x: 181.816, y: 45.191, radius: 1.25}
-- {x: 182.065, y: 45.854, radius: 1.0}
-- {x: 182.061, y: 46.34, mode: MED}
+- {x: 182.074, y: 45.925, radius: 1.0}
+- {x: 182.136, y: 47.306, mode: MED}
 - {x: 181.95, y: 59.61, mode: SLOW}
 - {x: 181.93, y: 61.951, radius: 1.25}
-- {x: 177.389, y: 61.946, mode: HIGH}
+- {x: 173.255, y: 61.97, mode: MED}
+- {x: 168.889, y: 61.93, mode: HIGH}
 - {x: 87.541, y: 61.852, mode: SLOW}
 - {x: 83.595, y: 61.848, radius: 1.25}
 - {x: 83.585, y: 64.394, mode: HIGH}
@@ -21,7 +22,7 @@ waypoints:
 - {x: 83.951, y: 80.147, mode: MED}
 - {x: 84.653, y: 81.578, mode: SLOW}
 - {x: 85.048, y: 82.383, radius: 1.25}
-- {x: 85.042, y: 82.98, mode: HIGH}
+- {x: 85.06, y: 83.302, mode: MED}
 - {x: 84.96, y: 90.54, mode: SLOW}
 - {x: 84.943, y: 92.131, radius: 0.75}
 - {x: 84.351, y: 92.44}
@@ -33,17 +34,19 @@ waypoints:
 - {x: 83.564, y: 77.207, name: REVERSE, action: stop, dwell: 1.0, radius: 0.0, direction: reverse, mode: SLOW}
 - {x: 83.544, y: 78.064, radius: 1.0, direction: reverse}
 - {x: 82.624, y: 79.156, radius: 1.0, direction: reverse}
-- {x: 82.613, y: 80.244, action: stop, dwell: 5.0, radius: 0.0, mode: SLOW, cart: attach}
+- {x: 82.62, y: 79.744, action: stop, dwell: 5.0, radius: 0.0, mode: SLOW, cart: attach}
 - {x: 82.624, y: 79.156, radius: 1.0}
 - {x: 83.568, y: 78.061, radius: 1.0}
 - {x: 83.566, y: 76.598, mode: HIGH}
 - {x: 83.588, y: 64.183, mode: SLOW}
 - {x: 83.598, y: 61.837, radius: 1.25}
-- {x: 88.144, y: 61.843, mode: MAX}
+- {x: 88.144, y: 61.843, mode: HIGH}
 - {x: 178.023, y: 61.956, mode: SLOW}
 - {x: 181.96, y: 61.961, radius: 1.25}
 - {x: 181.99, y: 59.424, mode: HIGH}
+- {x: 182.164, y: 44.348, mode: HIGH}
 - {x: 182.297, y: 33.436, mode: SLOW}
+- {x: 182.306, y: 32.727, action: stop, dwell: 3.0, cart: detach}
 - {x: 182.319, y: 31.588, radius: 0.75}
 - {x: 179.946, y: 31.553, radius: 0.75}
 - {x: 179.938, y: 32.608, mode: HIGH}
