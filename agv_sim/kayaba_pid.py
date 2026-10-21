@@ -108,7 +108,7 @@ def voltage_to_rpm(v, k, o):
 
 
 # ----------------------------------------------------------------------------- modes.py logic
-KNOWN_MODES = ("HIGH", "SLOW", "APPROACH")
+KNOWN_MODES = ("HIGH", "SLOW", "APPROACH", "MAX", "MED", "MEDIUM")   # modes modes.py switches gains for
 
 
 class KayabaController:
@@ -116,9 +116,10 @@ class KayabaController:
 
     def __init__(self, lf, wheel_diameter, gear_ratio, reverse=False, speed_mode="SLOW", extra_modes=None):
         self.lf = lf
-        # modes that are not in modes.py (e.g. MED), from the vehicle's Speed modes table:
-        # name -> (speed m/s, accel m/s2, decel m/s2). They use the SLOW gain set, like the
-        # else-branch of auto_mode's gain switch.
+        # speeds of the modes besides HIGH / SLOW / APPROACH: name -> (speed m/s, accel, decel).
+        # MAX / MED come from line_follow (speed_max / speed_med, ACCEL_RATE / DECEL_RATE) and have
+        # their own gain sets (fallback HIGH / SLOW); other modes come from the Speed modes table and
+        # use the SLOW gains, like the else-branch of auto_mode's gain switch.
         self.extra_modes = dict(extra_modes or {})
         self.wd = wheel_diameter
         self.gr = gear_ratio
@@ -154,26 +155,27 @@ class KayabaController:
             ts = lf.speed_approach
         elif self.speed_mode == "SLOW":
             ts = lf.speed_slow
-        elif self.speed_mode in self.extra_modes:
-            ts = self.extra_modes[self.speed_mode][0]
+        elif self._xkey() in self.extra_modes:
+            ts = self.extra_modes[self._xkey()][0]
         else:                                   # modes.py: anything else runs at HIGH speed
             ts = lf.speed_high
         return min(ts, self.speed_cap)
+
+    def _xkey(self):
+        """Key of the current mode in extra_modes (MEDIUM and MED are the same mode)."""
+        m = (self.speed_mode or "").upper()
+        return "MED" if m == "MEDIUM" else m
 
     def _switch_gains(self):
         if self.reverse or self.speed_mode == self.last_speed_mode:
             return
         lf = self.lf
-        if self.speed_mode == "HIGH":
-            self.pid.update_gains(lf.kp, lf.td, lf.n, lf.v_red_coef,
-                                  clamp_hi=lf.output_clamp_rpm, clamp_lo=-lf.output_clamp_rpm)
-        elif self.speed_mode == "APPROACH":
-            self.pid.update_gains(lf.kp_approach, lf.td_approach, lf.n_approach, lf.v_red_coef_approach,
-                                  clamp_hi=lf.output_clamp_into_bar_approach,
+        kp, td, n, vr = lf.gains(self.speed_mode)          # HIGH / MAX / MED / SLOW / else SLOW
+        if self.speed_mode == "APPROACH":
+            self.pid.update_gains(kp, td, n, vr, clamp_hi=lf.output_clamp_into_bar_approach,
                                   clamp_lo=-lf.output_clamp_away_approach)
         else:
-            self.pid.update_gains(lf.kp_slow, lf.td_slow, lf.n_slow, lf.v_red_coef_slow,
-                                  clamp_hi=lf.output_clamp_rpm, clamp_lo=-lf.output_clamp_rpm)
+            self.pid.update_gains(kp, td, n, vr, clamp_hi=lf.output_clamp_rpm, clamp_lo=-lf.output_clamp_rpm)
         self.last_speed_mode = self.speed_mode
 
     # ---- one control cycle -----------------------------------------------------------------
@@ -193,7 +195,7 @@ class KayabaController:
         if self.tape_was_lost:
             self.tape_was_lost = False          # "TAPE REACQUIRED — resuming" (ramps from 0)
 
-        xm = self.extra_modes.get(self.speed_mode) if not self.reverse else None
+        xm = self.extra_modes.get(self._xkey()) if not self.reverse else None
         if self.current_target_speed < target_speed:
             acc = xm[1] if xm else lf.accel_rate
             self.current_target_speed = min(target_speed, self.current_target_speed + acc * lf.dt)

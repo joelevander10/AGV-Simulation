@@ -252,6 +252,8 @@ class LineFollowSession:
         self.speed_mode = mode0 if mode0 and mode0 != "DEFAULT" else self.lf.start_mode.upper()
         self.extra_modes = {m.name.strip().upper(): (m.v_straight, m.accel, m.decel)
                             for m in agv.speed_modes if m.name.strip().upper() not in KNOWN_MODES}
+        for k in ("MAX", "MED"):                     # own speed / gain set in modes.py (fallback HIGH / SLOW)
+            self.extra_modes[k] = agv.lf_mode(k)
         self.fwd = KayabaController(self.lf, agv.wheels.diameter, agv.drivetrain.gear_ratio,
                                     reverse=False, speed_mode=self.speed_mode, extra_modes=self.extra_modes)
         self.mode_names = []
@@ -283,6 +285,13 @@ class LineFollowSession:
                                     f"line_follow.{attr} = {v_lf:.2f} m/s is above what the motors can do at the "
                                     f"{self.lf.ao_max_volt:.1f} V output limit ({vmax:.2f} m/s): {key} runs at "
                                     f"{vmax:.2f} m/s."})
+        for key in ("MAX", "MED"):
+            tm = next((m for m in agv.speed_modes if m.name.strip().upper() in ((key, "MEDIUM") if key == "MED" else (key,))), None)
+            own = self.lf.speed_max if key == "MAX" else self.lf.speed_med
+            if own is not None and tm is not None and abs(tm.v_straight - own) > 0.005:
+                self.events.append({"t": 0.0, "kind": "warning", "text":
+                                    f"Speed modes table says {key} = {tm.v_straight:.2f} m/s, but with line following "
+                                    f"on the AGV runs {key} at line_follow.speed_{key.lower()} = {own:.2f} m/s."})
         for key, (v, _, _) in self.extra_modes.items():
             if v > vmax + 0.005:
                 self.events.append({"t": 0.0, "kind": "note", "text":
@@ -370,8 +379,8 @@ class LineFollowSession:
         stats = self.stats
 
         def stats_for(c, dirn):
-            key = "REVERSE" if dirn < 0 else ("HIGH" if c.speed_mode == "HIGH" else
-                                               "APPROACH" if c.speed_mode == "APPROACH" else "SLOW")
+            mk = self.lf.mode_key(c.speed_mode)
+            key = "REVERSE" if dirn < 0 else (mk if mk in ("HIGH", "MAX", "MED", "APPROACH") else "SLOW")
             d = stats.get(key)
             if d is None:
                 d = stats[key] = {"e": [], "jit2": 0.0, "last_out": None, "cross": 0, "sign": 0,

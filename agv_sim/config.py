@@ -179,7 +179,13 @@ class LineFollow:
     kp: float = 1.4                  # HIGH
     td: float = 0.12
     n: float = 20.0
-    kp_slow: float = 2.2             # SLOW (and every mode that is not HIGH / APPROACH)
+    kp_max: Optional[float] = None   # MAX (own set, like KP_MAX in config.py; empty = the HIGH gains)
+    td_max: Optional[float] = None
+    n_max: Optional[float] = None
+    kp_med: Optional[float] = None   # MED / MEDIUM (KP_MEDIUM ...; empty = the SLOW gains)
+    td_med: Optional[float] = None
+    n_med: Optional[float] = None
+    kp_slow: float = 2.2             # SLOW (and every mode modes.py does not know)
     td_slow: float = 0.14
     n_slow: float = 12.0
     kp_approach: float = 1.6
@@ -196,6 +202,8 @@ class LineFollow:
     v_red_coef_slow: float = 2.0
     v_red_coef_approach: float = 0.0
     v_red_coef_reverse: float = 2.0
+    v_red_coef_max: Optional[float] = None   # empty = v_red_coef (HIGH)
+    v_red_coef_med: Optional[float] = None   # empty = v_red_coef_slow
     output_clamp_rpm: float = 800.0
     output_clamp_into_bar_approach: float = 800.0
     output_clamp_away_approach: float = 800.0
@@ -208,6 +216,8 @@ class LineFollow:
     speed_slow: float = 0.2          # AUTO_TARGET_SLOW_SPEED
     speed_approach: float = 0.1      # AUTO_TARGET_APPROACH_SPEED
     speed_reverse: float = 0.15      # AUTO_TARGET_REVERSE_SPEED
+    speed_max: Optional[float] = None  # AUTO_TARGET_MAX_SPEED (empty = Speed modes table MAX, else speed_high)
+    speed_med: Optional[float] = None  # AUTO_TARGET_MEDIUM_SPEED (empty = Speed modes table MED, else speed_high)
     accel_rate: float = 0.8
     decel_rate: float = 0.2
     approach_decel_rate: float = 0.4
@@ -243,6 +253,43 @@ class LineFollow:
     plant_scale_left: float = 1.0      # real / calibrated rpm (1.0 = calibration is exact)
     plant_scale_right: float = 1.0
     lost_abort_s: float = 1.5          # stopped without tape this long -> operator needed, cycle aborted
+
+    # ---- gain sets / speeds per speed mode, as modes.py picks them -----------------------
+    @staticmethod
+    def mode_key(mode: str) -> str:
+        """Speed-mode name -> gain-set key: HIGH, MAX, MED (also MEDIUM), SLOW, APPROACH, or '' (unknown)."""
+        m = (mode or "").strip().upper()
+        if m == "MEDIUM":
+            m = "MED"
+        return m if m in ("HIGH", "MAX", "MED", "SLOW", "APPROACH") else ""
+
+    def gains(self, mode: str):
+        """(kp, td, n, v_red_coef) of a speed mode. MAX falls back to the HIGH gains and MED to the SLOW
+        gains for every value left empty (config.py: KP_MAX = .get('KP_MAX', KP) ...); modes modes.py
+        does not know run with the SLOW gains (its else-branch)."""
+        k = self.mode_key(mode)
+        hi = (self.kp, self.td, self.n, self.v_red_coef)
+        sl = (self.kp_slow, self.td_slow, self.n_slow, self.v_red_coef_slow)
+        if k == "HIGH":
+            return hi
+        if k == "MAX":
+            own = (self.kp_max, self.td_max, self.n_max, self.v_red_coef_max)
+            return tuple(o if o is not None else b for o, b in zip(own, hi))
+        if k == "MED":
+            own = (self.kp_med, self.td_med, self.n_med, self.v_red_coef_med)
+            return tuple(o if o is not None else b for o, b in zip(own, sl))
+        if k == "APPROACH":
+            return (self.kp_approach, self.td_approach, self.n_approach, self.v_red_coef_approach)
+        return sl
+
+    def own_gains(self, mode: str) -> bool:
+        """MAX / MED: True when the vehicle has its own gain values for it (not the fallback)."""
+        k = self.mode_key(mode)
+        if k == "MAX":
+            return any(v is not None for v in (self.kp_max, self.td_max, self.n_max, self.v_red_coef_max))
+        if k == "MED":
+            return any(v is not None for v in (self.kp_med, self.td_med, self.n_med, self.v_red_coef_med))
+        return k in ("HIGH", "SLOW", "APPROACH")
 
 
 @dataclass
@@ -341,6 +388,29 @@ class AGVConfig:
             if s.name == name:
                 return s
         raise ValueError(f"No sensor named '{name}'. Known sensors: {[s.name for s in self.sensors]}")
+
+    def lf_mode(self, mode: str):
+        """(speed m/s, accel, decel) the closed-loop controller drives a speed mode with, like modes.py:
+        HIGH / SLOW / APPROACH / MAX / MED(IUM) from line_follow (MAX / MED: speed_max / speed_med, empty =
+        the Speed modes table, else speed_high), all with ACCEL_RATE / DECEL_RATE (APPROACH slows with
+        approach_decel_rate). Other modes: the Speed modes table (None when it has no such mode)."""
+        lf = self.line_follow
+        k = lf.mode_key(mode) if lf is not None else ""
+        table = {m.name.strip().upper(): m for m in self.speed_modes}
+        if lf is not None and k:
+            if k == "HIGH":
+                v = lf.speed_high
+            elif k == "SLOW":
+                v = lf.speed_slow
+            elif k == "APPROACH":
+                return (lf.speed_approach, lf.accel_rate, lf.approach_decel_rate)
+            else:
+                own = lf.speed_max if k == "MAX" else lf.speed_med
+                tm = table.get(k) or (table.get("MEDIUM") if k == "MED" else None)
+                v = own if own is not None else (tm.v_straight if tm is not None else lf.speed_high)
+            return (v, lf.accel_rate, lf.decel_rate)
+        m = table.get((mode or "").strip().upper())
+        return (m.v_straight, m.accel, m.decel) if m is not None else None
 
     def tracking_offset(self, direction: int) -> float:
         """Distance (m) from drive axle to the tracking point, measured along the travel direction."""

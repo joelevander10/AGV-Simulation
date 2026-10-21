@@ -515,3 +515,32 @@ if __name__ == "__main__":
     if skipped:
         print(f"({skipped} slow test(s) skipped)")
     sys.exit(1 if fails else 0)
+
+
+def test_max_and_medium_have_own_gain_sets():
+    """modes.py: MAX uses KP_MAX... (empty = HIGH gains), MEDIUM uses KP_MEDIUM... (empty = SLOW gains);
+    both with their own AUTO_TARGET_*_SPEED and the shared ACCEL_RATE / DECEL_RATE."""
+    from agv_sim.kayaba_pid import KayabaController
+    a = load_agv(os.path.join(DATA, "agv2.yaml"))
+    lf = a.line_follow
+    lf.kp, lf.td, lf.kp_slow, lf.td_slow = 1.4, 0.12, 2.2, 0.14
+    assert lf.gains("MAX")[:2] == (1.4, 0.12) and lf.gains("MED")[:2] == (2.2, 0.14)    # fall back
+    assert lf.gains("MEDIUM") == lf.gains("MED")
+    lf.kp_max, lf.td_max, lf.kp_med = 1.0, 0.15, 3.0
+    assert lf.gains("MAX")[:3] == (1.0, 0.15, lf.n) and lf.gains("MED")[:2] == (3.0, 0.14)
+    lf.speed_max, lf.speed_med, lf.accel_rate, lf.decel_rate = 0.9, 0.4, 0.3, 0.25
+    assert a.lf_mode("MAX") == (0.9, 0.3, 0.25) and a.lf_mode("MEDIUM") == (0.4, 0.3, 0.25)
+    xm = {"MAX": a.lf_mode("MAX"), "MED": a.lf_mode("MED")}
+    for mode, kp, ts in (("MAX", 1.0, 0.9), ("MEDIUM", 3.0, 0.4), ("HIGH", 1.4, lf.speed_high)):
+        c = KayabaController(lf, a.wheels.diameter, a.drivetrain.gear_ratio, speed_mode=mode, extra_modes=xm)
+        c._switch_gains()
+        assert abs(c.pid._kp - kp) < 1e-12 and abs(c._target_speed() - min(ts, c.speed_cap)) < 1e-12
+
+
+def test_profile_import_reads_max_and_medium():
+    from agv_sim.profile_import import profile_to_line_follow
+    out = profile_to_line_follow({"pid_tuning": {"KP_MAX": 1.0, "TD_MAX": 0.15, "N_MAX": 20, "V_RED_COEF_MAX": 4,
+                                                 "KP_MEDIUM": 2.2, "TD_MEDIUM": 0.14},
+                                  "speeds": {"AUTO_TARGET_MAX_SPEED": 1.0, "AUTO_TARGET_MEDIUM_SPEED": 0.4}})
+    assert out["kp_max"] == 1.0 and out["v_red_coef_max"] == 4 and out["kp_med"] == 2.2
+    assert out["speed_max"] == 1.0 and out["speed_med"] == 0.4 and "n_med" not in out

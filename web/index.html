@@ -422,7 +422,7 @@ function showTune() {
   if (r) {
     const f = (v, d = 1) => v == null ? "–" : fmt(v, d);
     h += `<table><tr><th>Gain set</th><th>Kp</th><th>Td</th><th>Tape RMS</th><th>99 %</th><th>Max</th><th>Wobble</th></tr>` +
-      r.rows.map(w => `<tr><td style="text-align:left"><b>${esc(w.set)}</b>${w.set === "SLOW" ? ' <span class="muted">(+ MED, other modes)</span>' : ""}</td>
+      r.rows.map(w => `<tr><td style="text-align:left"><b>${esc(w.set)}</b>${w.set === "SLOW" ? ' <span class="muted">(+ other modes)</span>' : w.set === "MED" ? ' <span class="muted">(MEDIUM)</span>' : ""}</td>
         <td>${f(w.kp_old, 2)} → <b>${f(w.kp_new, 2)}</b></td><td>${f(w.td_old, 3)} → <b>${f(w.td_new, 3)}</b></td>
         <td>${f(w.before && w.before.rms)} → <b>${f(w.after && w.after.rms)}</b> mm</td>
         <td>${f(w.before && w.before.p99, 0)} → <b>${f(w.after && w.after.p99, 0)}</b></td>
@@ -2552,12 +2552,17 @@ const AGV_FORM = [
     ["line_follow.n", "N (HIGH)", "", null, d => d.line_follow.enabled], ["line_follow.v_red_coef", "V_RED_COEF (HIGH)", "", null, d => d.line_follow.enabled],
     ["line_follow.kp_slow", "KP_SLOW", "", null, d => d.line_follow.enabled], ["line_follow.td_slow", "TD_SLOW", "s", null, d => d.line_follow.enabled],
     ["line_follow.n_slow", "N_SLOW", "", null, d => d.line_follow.enabled], ["line_follow.v_red_coef_slow", "V_RED_COEF_SLOW", "", null, d => d.line_follow.enabled],
+    ["line_follow.kp_max", "KP_MAX", "", "opt:= KP (HIGH)", d => d.line_follow.enabled], ["line_follow.td_max", "TD_MAX", "s", "opt:= TD (HIGH)", d => d.line_follow.enabled],
+    ["line_follow.n_max", "N_MAX", "", "opt:= N (HIGH)", d => d.line_follow.enabled], ["line_follow.v_red_coef_max", "V_RED_COEF_MAX", "", "opt:= V_RED_COEF (HIGH)", d => d.line_follow.enabled],
+    ["line_follow.kp_med", "KP_MEDIUM", "", "opt:= KP_SLOW", d => d.line_follow.enabled], ["line_follow.td_med", "TD_MEDIUM", "s", "opt:= TD_SLOW", d => d.line_follow.enabled],
+    ["line_follow.n_med", "N_MEDIUM", "", "opt:= N_SLOW", d => d.line_follow.enabled], ["line_follow.v_red_coef_med", "V_RED_COEF_MEDIUM", "", "opt:= V_RED_COEF_SLOW", d => d.line_follow.enabled],
     ["line_follow.ti", "TI", "s", null, d => d.line_follow.enabled], ["line_follow.ti_deadband", "TI_DEADBAND", "mm", null, d => d.line_follow.enabled],
     ["line_follow.ti_max", "TI_MAX", "", null, d => d.line_follow.enabled], ["line_follow.dt", "DT (loop period)", "s", null, d => d.line_follow.enabled],
     ["line_follow.output_clamp_rpm", "OUTPUT_CLAMP_RPM", "rpm", null, d => d.line_follow.enabled],
     ["line_follow.sr_alpha", "SR_ALPHA", "", null, d => d.line_follow.enabled], ["line_follow.sr_cap", "SR_CAP", "", null, d => d.line_follow.enabled],
     ["line_follow.speed_high", "AUTO HIGH speed", "m/s", null, d => d.line_follow.enabled], ["line_follow.speed_slow", "AUTO SLOW speed", "m/s", null, d => d.line_follow.enabled],
     ["line_follow.speed_approach", "APPROACH speed", "m/s", null, d => d.line_follow.enabled], ["line_follow.speed_reverse", "REVERSE speed", "m/s", null, d => d.line_follow.enabled],
+    ["line_follow.speed_max", "AUTO MAX speed", "m/s", "opt:Speed modes table", d => d.line_follow.enabled], ["line_follow.speed_med", "AUTO MEDIUM speed", "m/s", "opt:Speed modes table", d => d.line_follow.enabled],
     ["line_follow.accel_rate", "ACCEL_RATE", "m/s²", null, d => d.line_follow.enabled], ["line_follow.decel_rate", "DECEL_RATE", "m/s²", null, d => d.line_follow.enabled],
     ["line_follow.sensor_range_mm", "Sensor sees the tape within ±", "mm", null, d => d.line_follow.enabled],
     ["line_follow.sensor_noise_mm", "Sensor noise (std-dev)", "mm", null, d => d.line_follow.enabled],
@@ -2566,7 +2571,7 @@ const AGV_FORM = [
     ["line_follow.brake_decel", "Braking when the brake is on", "m/s²", null, d => d.line_follow.enabled],
     ["line_follow.plant_scale_left", "Left wheel real/calibrated speed", "×", null, d => d.line_follow.enabled],
     ["line_follow.plant_scale_right", "Right wheel real/calibrated speed", "×", null, d => d.line_follow.enabled]],
-   hint: "Runs your controller (core/pid.py + modes.py) against the MGS1600 model every 10 ms. Route points act as RFID tags: a point's speed mode (HIGH / SLOW / APPROACH) starts there, and stops brake when their tag is read."},
+   hint: "Runs your controller (core/pid.py + modes.py) against the MGS1600 model every 10 ms. Route points act as RFID tags: a point's speed mode (HIGH / MAX / MED / SLOW / APPROACH) starts there, and stops brake when their tag is read. MAX and MEDIUM have their own gains like the AGV's config.py: leave a box empty to use the HIGH (MAX) or SLOW (MEDIUM) value."},
   {t: "Line following – reverse, approach, motor map", lf: true, f: [
     ["line_follow.kp_reverse", "KP_REVERSE", ""], ["line_follow.td_reverse", "TD_REVERSE", "s"], ["line_follow.n_reverse", "N_REVERSE", ""],
     ["line_follow.v_red_coef_reverse", "V_RED_COEF_REVERSE", ""], ["line_follow.error_sign_reverse", "Reverse error sign", ""],
@@ -2591,7 +2596,9 @@ function setP(o, p, v) { const ks = p.split("."), last = ks.pop(); ks.reduce((a,
 // With line following on, HIGH / SLOW / APPROACH run at the line_follow values (like modes.py on the real
 // AGV). The Speed modes table rows of those names are kept equal to them: editing either one changes both.
 const LF_MODE = {HIGH: ["speed_high", "accel_rate", "decel_rate"], SLOW: ["speed_slow", "accel_rate", "decel_rate"],
-                 APPROACH: ["speed_approach", "accel_rate", "approach_decel_rate"]};
+                 APPROACH: ["speed_approach", "accel_rate", "approach_decel_rate"],
+                 MAX: ["speed_max", "accel_rate", "decel_rate"], MED: ["speed_med", "accel_rate", "decel_rate"],
+                 MEDIUM: ["speed_med", "accel_rate", "decel_rate"]};
 function lfLink(A, name) {
   return A && A.line_follow && A.line_follow.enabled ? LF_MODE[String(name || "").trim().toUpperCase()] : null;
 }
@@ -2600,7 +2607,8 @@ function syncModesFromLF(A) {
   (A.speed_modes || []).forEach(m => {
     const L = lfLink(A, m.name); if (!L) return;
     const lf = A.line_follow;
-    m.v_straight = lf[L[0]]; m.v_curve = lf[L[0]]; m.accel = lf[L[1]]; m.decel = lf[L[2]]; m.v_reverse = lf.speed_reverse;
+    if (lf[L[0]] != null) { m.v_straight = lf[L[0]]; m.v_curve = lf[L[0]]; }   // MAX / MED: empty speed = this table's
+    m.accel = lf[L[1]]; m.decel = lf[L[2]]; m.v_reverse = lf.speed_reverse;
   });
 }
 async function loadAgv(name) {
@@ -2671,6 +2679,8 @@ function renderVehiclePane() {
             : kind;
           const numeric = typeof val === "number";
           input = `<select onchange="agvSet('${p}',${numeric ? "+this.value" : "this.value"},true)">${Object.entries(opts).map(([k, v]) => `<option value="${esc(k)}" ${String(k) === String(val) ? "selected" : ""}>${esc(v)}</option>`).join("")}</select>`;
+        } else if (typeof kind === "string" && kind.startsWith("opt:")) {   // empty = falls back (like config.py .get())
+          input = `<input type="number" step="any" value="${val ?? ""}" placeholder="${esc(kind.slice(4))}" onchange="agvSetOpt('${p}',this.value)">`;
         } else input = `<input type="number" step="any" value="${val}" onchange="agvSet('${p}',this.value)">`;
         h += `<div class="row"><label>${esc(label)}</label>${input}<span class="unit">${unit || ""}</span></div>`;
       }
@@ -2719,6 +2729,10 @@ async function importProfile(input) {
   } catch (e) { toast(e.message, true); }
   input.value = "";
 }
+function agvSetOpt(p, v) {
+  if (String(v).trim() === "") { setP(S.agv, p, null); if (p.startsWith("line_follow.")) syncModesFromLF(S.agv); agvChanged(true); return; }
+  agvSet(p, v);
+}
 function agvSet(p, v, raw = false) {
   const cur = getP(S.agv, p);
   if (!raw) { v = parseFloat(String(v).replace(",", ".")); if (!isFinite(v)) { toast("Please enter a number", true); renderVehiclePane(); return; } }
@@ -2737,7 +2751,7 @@ function tableSet(t, i, k, v, isText) {
       else if (k === "accel") lf[L[1]] = v;
       else if (k === "decel") lf[L[2]] = v;
       else if (k === "v_reverse") lf.speed_reverse = v;
-      if (k === "accel" || k === "v_reverse") toast(`Line following: ${k === "accel" ? "ACCEL_RATE" : "REVERSE speed"} is shared by HIGH, SLOW and APPROACH - changed for all three.`);
+      if (k === "accel" || k === "v_reverse") toast(`Line following: ${k === "accel" ? "ACCEL_RATE" : "REVERSE speed"} is shared by all speed modes (like modes.py) - changed for all of them.`);
     }
     syncModesFromLF(S.agv);
   }

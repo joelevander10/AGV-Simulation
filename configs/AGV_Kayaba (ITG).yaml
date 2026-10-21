@@ -21,8 +21,8 @@ speed_modes:
 - {name: HIGH, v_straight: 0.6, v_curve: 0.6, v_reverse: 0.15, accel: 0.2, decel: 0.2}
 - {name: SLOW, v_straight: 0.2, v_curve: 0.2, v_reverse: 0.15, accel: 0.2, decel: 0.2}
 - {name: APPROACH, v_straight: 0.1, v_curve: 0.1, v_reverse: 0.15, accel: 0.2, decel: 0.2}
-- {name: MED, v_straight: 0.4, v_curve: 0.4, v_reverse: 0.2, accel: 0.2, decel: 0.25}
-- {name: MAX, v_straight: 1.0, v_curve: 1.0, v_reverse: 0.2, accel: 0.2, decel: 0.25}
+- {name: MED, v_straight: 0.4, v_curve: 0.4, v_reverse: 0.15, accel: 0.2, decel: 0.2}
+- {name: MAX, v_straight: 1.0, v_curve: 1.0, v_reverse: 0.15, accel: 0.2, decel: 0.2}
 sensors:
 - {name: tape_front, type: MGS1600, x: 0.076, y: 0.0, z: 0.03, note: '[spec] 7.6 cm ahead of the drive-wheel centre,
     CAN node 6'}
@@ -49,12 +49,18 @@ cart:
 tracking: {forward: tape_front, reverse: tape_rear}
 line_follow:
   enabled: true
-  kp: 2.24
-  td: 0.337
-  n: 20.0
-  kp_slow: 6.187
+  kp: 0.366
+  td: 2.255
+  n: 30.0
+  kp_max: 0.2
+  td_max: 2.5
+  n_max: 30.0
+  kp_med: 0.795
+  td_med: 1.734
+  n_med: 30.0
+  kp_slow: 2.2
   td_slow: 0.14
-  n_slow: 12.0
+  n_slow: 14.0
   kp_approach: 0.419
   td_approach: 0.12
   n_approach: 12.0
@@ -69,6 +75,8 @@ line_follow:
   v_red_coef_slow: 2.0
   v_red_coef_approach: 0.0
   v_red_coef_reverse: 2.0
+  v_red_coef_max: 4.0
+  v_red_coef_med: 2.0
   output_clamp_rpm: 800.0
   output_clamp_into_bar_approach: 800.0
   output_clamp_away_approach: 800.0
@@ -80,6 +88,8 @@ line_follow:
   speed_slow: 0.2
   speed_approach: 0.1
   speed_reverse: 0.15
+  speed_max: null
+  speed_med: null
   accel_rate: 0.2
   decel_rate: 0.2
   approach_decel_rate: 0.2

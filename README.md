@@ -195,10 +195,25 @@ Corners whose fillet does not fit the leg lengths are clamped and reported as wa
 ## Closed-loop tape following with your own PID (line_follow)
 
 **Speeds with line following on:** HIGH, SLOW and APPROACH run at `line_follow.speed_high / speed_slow /
-speed_approach` with `accel_rate`, `decel_rate` (`approach_decel_rate` into APPROACH) - exactly like modes.py
-on the real AGV - not at the `speed_modes` rows of the same name. The app keeps those rows equal to the
-line_follow values (marked ⇄; editing either changes both); a YAML where they differ gets a warning in the
-report. Other modes (e.g. MED) use their own row. Top speed is capped by the 0-5 V output (≈0.98 m/s for AGV2).
+speed_approach`, MAX and MEDIUM at `speed_max / speed_med` (empty = HIGH speed, like AUTO_TARGET_MAX_SPEED /
+AUTO_TARGET_MEDIUM_SPEED in config.py). All modes use `accel_rate`, `decel_rate` (`approach_decel_rate` into
+APPROACH) - exactly like modes.py on the real AGV - not the `speed_modes` rows of the same name. The app keeps
+those rows equal to the line_follow values (marked ⇄; editing either changes both); a YAML where they differ
+gets a warning in the report. MED and MEDIUM are the same mode. Other modes use their own row. Top speed is
+capped by the 0-5 V output (≈0.98 m/s for AGV2).
+
+**PID gain sets** (Vehicle → Line following), one per speed mode, like the real AGV:
+
+| Mode | Gains | Empty value falls back to |
+|---|---|---|
+| HIGH | `kp`, `td`, `n`, `v_red_coef` (KP, TD, …) | - |
+| MAX | `kp_max`, `td_max`, `n_max`, `v_red_coef_max` (KP_MAX, …) | HIGH |
+| MEDIUM | `kp_med`, `td_med`, `n_med`, `v_red_coef_med` (KP_MEDIUM, …) | SLOW |
+| SLOW | `kp_slow`, `td_slow`, … (KP_SLOW, …) | - |
+| APPROACH | `kp_approach`, … (KP_APPROACH, …) | - |
+
+Each value falls back on its own (e.g. only KP_MAX set → MAX uses KP_MAX with the HIGH Td, N and speed
+reduction). Any other mode name uses the SLOW gains.
 
 With `line_follow.enabled: true` (it is on in `configs/agv2.yaml`) every drive run is simulated closed-loop:
 the MGS1600 is modelled as a 160 mm line across the vehicle that reports where the tape crosses it
@@ -222,8 +237,8 @@ ERROR_SIGN_FORWARD = +1 steers correctly (and -1 loses the tape), matching what 
 Copy new tuning from the robot with `python main.py import-profile --json .../profiles/agv2_kim.json --agv configs/agv2.yaml`
 or the **Import from AGV profile** button in the Vehicle tab.
 
-Note found while porting: `modes.py` only knows HIGH, SLOW and APPROACH. A `set_speed` of any other name
-(e.g. EXTRA_SLOW) makes auto_mode drive at **HIGH speed** with SLOW gains, and AUTO_TARGET_EXTRA_SLOW_SPEED
+Note found while porting: `modes.py` knows HIGH, MAX, MEDIUM, SLOW and APPROACH. A `set_speed` of any other
+name (e.g. EXTRA_SLOW) makes auto_mode drive at **HIGH speed** with SLOW gains, and AUTO_TARGET_EXTRA_SLOW_SPEED
 is never read by config.py. The simulator reproduces this and warns.
 
 ## PID auto-tune
@@ -231,8 +246,9 @@ is never read by config.py. The simulator reproduces this and warns.
 Vehicle → Line following → **🎯 Auto-tune PID on this route** (or
 `python main.py tune-pid --agv configs/agv2.yaml --route routes/my.yaml [--apply]`).
 It drives the route open in the Route tab again and again with your controller and changes **Kp and Td** of
-every gain set the route uses - HIGH (`kp`, `td`), SLOW (`kp_slow`, `td_slow`; also MED and every mode modes.py does
-not know), APPROACH, REVERSE - each judged only on the stretches it drives. N and Ti stay as they are.
+every gain set the route uses - HIGH (`kp`, `td`), MAX (`kp_max`, `td_max`), MEDIUM (`kp_med`, `td_med`), SLOW
+(`kp_slow`, `td_slow`; also every mode modes.py does not know), APPROACH, REVERSE - each judged only on the
+stretches it drives. A MAX / MEDIUM set that was empty gets its own values after tuning. N and Ti stay as they are.
 
 * "Best" = balanced: small tape error (RMS + 99 %), little wobble (error changing side), calm steering (no
   jitter from noise), no saturation, far from the sensor edge, never losing the tape.
@@ -240,7 +256,7 @@ not know), APPROACH, REVERSE - each judged only on the stretches it drives. N an
   motors, one wheel 3 % off), Kp / Td stay within 1/3 … 3 × the current values, and at the end 2 × the new Kp
   must still hold the tape calmly (gain margin), otherwise Kp is lowered.
 * Result: old → new Kp / Td with tape RMS / 99 % / max / wobble before and after, the values to copy into
-  agv2_kim.json ("pid_tuning": KP, TD, KP_SLOW, …) and **Apply to vehicle** (then *Save vehicle*).
+  agv2_kim.json ("pid_tuning": KP, TD, KP_MAX, KP_MEDIUM, KP_SLOW, …) and **Apply to vehicle** (then *Save vehicle*).
 * The simulation is not the real AGV - try the new values at SLOW first or go half-way, and watch the tape error.
   Takes about 1-5 minutes (several tries run in parallel).
 

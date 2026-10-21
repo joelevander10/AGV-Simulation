@@ -7,7 +7,9 @@ keep a safety margin on the real AGV.
 
 Gain sets (like modes.py switches them):
   HIGH      kp, td, n                  (speed_mode HIGH)
-  SLOW      kp_slow, td_slow, n_slow   (SLOW and every mode modes.py does not know, e.g. MED)
+  MAX       kp_max, td_max, n_max      (MAX; empty = the HIGH gains until tuned)
+  MED       kp_med, td_med, n_med      (MED / MEDIUM; empty = the SLOW gains until tuned)
+  SLOW      kp_slow, td_slow, n_slow   (SLOW and every mode modes.py does not know)
   APPROACH  kp_approach, td_approach, n_approach
   REVERSE   kp_reverse, td_reverse, n_reverse
 Only Kp and Td are changed (N and Ti stay). Each set is judged only on the stretches it drives.
@@ -30,12 +32,15 @@ from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
 
-SETS = {"HIGH": ("kp", "td", "n"), "SLOW": ("kp_slow", "td_slow", "n_slow"),
+SETS = {"HIGH": ("kp", "td", "n"), "MAX": ("kp_max", "td_max", "n_max"), "MED": ("kp_med", "td_med", "n_med"),
+        "SLOW": ("kp_slow", "td_slow", "n_slow"),
         "APPROACH": ("kp_approach", "td_approach", "n_approach"),
         "REVERSE": ("kp_reverse", "td_reverse", "n_reverse")}
 JSON_KEYS = {"kp": "KP", "td": "TD", "n": "N", "kp_slow": "KP_SLOW", "td_slow": "TD_SLOW", "n_slow": "N_SLOW",
              "kp_approach": "KP_APPROACH", "td_approach": "TD_APPROACH", "n_approach": "N_APPROACH",
-             "kp_reverse": "KP_REVERSE", "td_reverse": "TD_REVERSE", "n_reverse": "N_REVERSE"}
+             "kp_reverse": "KP_REVERSE", "td_reverse": "TD_REVERSE", "n_reverse": "N_REVERSE",
+             "kp_max": "KP_MAX", "td_max": "TD_MAX", "n_max": "N_MAX",
+             "kp_med": "KP_MEDIUM", "td_med": "TD_MEDIUM", "n_med": "N_MEDIUM"}
 KP_RANGE = (0.1, 20.0)
 TD_RANGE = (0.005, 2.0)
 MIN_DIST = 1.0          # m a set must drive to be tuned
@@ -52,9 +57,16 @@ def harsh(agv):
     return a
 
 
+def _eff(lf, s):
+    """(kp, td, n) a gain set really runs with (MAX / MED fall back to HIGH / SLOW while empty)."""
+    if s == "REVERSE":
+        return lf.kp_reverse, lf.td_reverse, lf.n_reverse
+    return lf.gains(s)[:3]
+
+
 def _gains(agv):
     lf = agv.line_follow
-    return {s: (getattr(lf, f[0]), getattr(lf, f[1])) for s, f in SETS.items()}
+    return {s: _eff(lf, s)[:2] for s in SETS}
 
 
 def _set_gains(agv, g):
@@ -164,7 +176,7 @@ class Tuner:
             raise ValueError("The route never drives far enough in any speed mode to tune the PID.")
         self.active = [s for s in SETS if s in used]
         self.jit0 = {s: max(used[s]["jitter"], 1e-3) for s in self.active}
-        names = {"SLOW": "SLOW (also MED and other modes)"}
+        names = {"SLOW": "SLOW (and modes modes.py does not know)", "MED": "MEDIUM", "MAX": "MAX"}
         self.log("Gain sets used on this route: " + ", ".join(
             f"{names.get(s, s)} {used[s]['dist']:.0f} m" for s in self.active))
         if base_h["aborted"]:
@@ -261,7 +273,7 @@ class Tuner:
             f = SETS[s]
             rows.append({"set": s, "fields": list(f[:2]), "json": [JSON_KEYS[f[0]], JSON_KEYS[f[1]]],
                          "kp_old": g0[s][0], "td_old": g0[s][1], "kp_new": g1[s][0], "td_new": g1[s][1],
-                         "n": getattr(lf, f[2]),
+                         "n": _eff(lf, s)[2],
                          "before": base_n["sets"].get(s), "after": after_n["sets"].get(s),
                          "before_harsh": base_h["sets"].get(s), "after_harsh": best_r["sets"].get(s),
                          "score_old": J0[s], "score_new": J[s]})

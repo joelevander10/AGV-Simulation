@@ -350,10 +350,14 @@ class AutoRoute:
         self.speeds = {}
         for m in agv.speed_modes:
             self.speeds[m.name.strip().upper()] = (m.v_straight, m.accel, m.decel)
-        if lf.enabled:
-            self.speeds["HIGH"] = (min(lf.speed_high, agv.max_wheel_speed), lf.accel_rate, lf.decel_rate)
-            self.speeds["SLOW"] = (lf.speed_slow, lf.accel_rate, lf.decel_rate)
-            self.speeds["APPROACH"] = (lf.speed_approach, lf.accel_rate, lf.approach_decel_rate)
+        if lf.enabled:                     # like the closed-loop controller drives them (modes.py)
+            keys = list(self.speeds) + ["HIGH", "SLOW", "APPROACH"]
+            keys += ["MAX"] if lf.speed_max is not None else []
+            keys += ["MED"] if lf.speed_med is not None and "MEDIUM" not in self.speeds else []
+            for k in dict.fromkeys(keys):
+                if lf.mode_key(k):
+                    v, a_, d_ = agv.lf_mode(k)
+                    self.speeds[k] = (min(v, agv.max_wheel_speed), a_, d_)
         # ramps with the load (trolleys speed up / slow down slower, drive.py)
         from .drive import DriveLimits
         m_tow = sum(agv.train_masses()) if agv.hook_type == "tow" else 0.0

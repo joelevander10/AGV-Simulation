@@ -22,7 +22,7 @@ waypoints:
 - {x: 42.655, y: 89.849, mode: MED}
 - {x: 51.832, y: 89.908, mode: APPROACH}
 - {x: 53.31, y: 89.918, action: stop, dwell: 3.0, radius: 0.0, mode: SLOW, cart: detach}
-- {x: 54.674, y: 89.882, radius: 0.75}
+- {x: 54.673, y: 89.972, radius: 0.75}
 - {x: 55.191, y: 91.214, radius: 0.75}
 - {x: 54.418, y: 92.222, radius: 0.75}
 - {x: 52.396, y: 92.231, radius: 1.25}
